@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Welcome, {{ g.user.username }}</h1>
+  <p class="muted">Email: {{ g.user.email }}</p>
+  <p class="muted">Member since: {{ g.user.created_at }}</p>
+  <p class="muted">Last login: {{ g.user.last_login_at or 'first session' }}</p>
+</div>
+{% endblock %}
