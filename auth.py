@@ -98,7 +98,7 @@ def login():
             (identifier, identifier),
         ).fetchone()
 
-        generic_error = "Invalid credentials."
+        generic_error = "Wrong username or password."
 
         if user is None:
             verify_password(DUMMY_HASH, password)  # equalise timing

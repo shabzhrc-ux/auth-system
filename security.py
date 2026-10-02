@@ -3,7 +3,7 @@ import re
 import secrets
 from hmac import compare_digest
 
-from flask import abort, request, session
+from flask import flash, redirect, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 USERNAME_RE = re.compile(r"^[A-Za-z0-9_.-]{3,32}$")
@@ -48,9 +48,17 @@ def get_csrf_token() -> str:
     return session["csrf_token"]
 
 
-def enforce_csrf() -> None:
+def enforce_csrf():
+    """Reject POSTs without a valid CSRF token.
+
+    A stale form (back button after logout, expired session, restarted server)
+    gets a friendly message and a fresh form instead of a raw error page.
+    """
     if request.method in ("POST", "PUT", "PATCH", "DELETE"):
         sent = request.form.get("csrf_token", "")
         expected = session.get("csrf_token", "")
         if not expected or not compare_digest(sent, expected):
-            abort(400, description="Invalid or missing CSRF token.")
+            flash("Your session expired. Please try again.", "error")
+            if request.endpoint == "auth.logout":
+                return redirect(url_for("auth.login"))
+            return redirect(request.path)
